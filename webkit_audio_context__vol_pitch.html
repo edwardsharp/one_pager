@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>VOL PITCH webkitAudioContext Oscillator - demo by edwardsharp</title>
+
+  <style type='text/css'>
+    
+  </style>
+
+  <script type='text/javascript'>//<![CDATA[ 
+  window.onload=function(){
+  var ctx = new webkitAudioContext(),
+      osc = ctx.createOscillator(),
+      vol = ctx.createGainNode();
+
+  // some defaultz
+  osc.frequency.value = 666;
+  vol.gain.value = 0.1;
+  var chk = false;
+  var last_vol = 0;
+
+  // route the signal
+  osc.connect(vol);
+  vol.connect(ctx.destination);
+
+
+  // UI
+  document.getElementById('volume').addEventListener('change', function() {
+      if(chk){
+          vol.gain.value = this.value;
+          document.getElementById('io').checked = true;
+      }
+      
+  });
+
+  document.getElementById('pitch').addEventListener('change', function() {
+      osc.frequency.value = this.value;
+  });
+
+  document.getElementById('io').addEventListener('change', function() { 
+      if (this.checked) {
+          if(chk && last_vol > 0) {
+              //set the vol to whatever was prev set
+              vol.gain.value = last_vol;
+              document.getElementById('volume').value = last_vol;
+              
+          }else if (chk){
+              //if no prev set yet use the slider val
+              vol.gain.value = document.getElementById('volume').value;
+          }else {
+              //or this is the first time, turn the osc on!
+              osc.noteOn(0);
+              chk = true;
+          }
+      } else {
+          //be lazy and turn vol to 0 instead of noteOff cuz the ctx will need to be recreated!
+          //grab the value so it can be set later...
+          last_vol = vol.gain.value;
+          vol.gain.value = 0;
+          //sync the slider.
+          document.getElementById('volume').value = 0;
+          //osc.noteOff(0);
+      }
+      
+  });
+
+
+
+  }//]]>  
+
+  </script>
+
+
+</head>
+<body>
+  <input id="volume" type="range" min="0" max="1" step="0.1" value="0.1"/>VOL
+<br />
+<input id="pitch" type="range" min="0" max="999" step="0.01" value="666"/>PITCH
+<br />
+<input id="io" class="io" type="checkbox"/>ON/OFF
+  
+</body>
+
+
+</html>
+
